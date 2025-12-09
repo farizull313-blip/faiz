@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Marz Pedia - Standalone</title>
+  
+  <!-- 1. Tailwind CSS (via CDN for portability) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 2. Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- 3. Icons (Phosphor Icons for easy usage) -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <!-- 4. Configuration -->
+  <script>
+      tailwind.config = {
+          darkMode: 'class',
+          theme: {
+              extend: {
+                  fontFamily: {
+                      sans: ['Inter', 'sans-serif'],
+                      heading: ['Space Grotesk', 'sans-serif'],
+                  },
+                  colors: {
+                      primary: {
+                          DEFAULT: '#0ea5a6',
+                          foreground: '#ffffff',
+                      },
+                      secondary: {
+                          DEFAULT: '#f1f5f9',
+                          foreground: '#0f172a',
+                      },
+                      card: {
+                          DEFAULT: '#ffffff',
+                          foreground: '#0f172a',
+                      },
+                      destructive: {
+                          DEFAULT: '#ef4444',
+                          foreground: '#ffffff',
+                      }
+                  }
+              }
+          }
+      }
+  </script>
+  
+  <style>
+      body {
+          font-family: 'Inter', sans-serif;
+          background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%);
+          color: #0f172a;
+      }
+      h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.6); }
+      
+      .slider-container {
+          width: 100%;
+          max-width: 1200px;
+          margin: 120px auto 20px auto;
+          position: relative;
+      }
+      
+      .slider-img {
+          width: 100%;
+          height: 70vh;
+          min-height: 320px;
+          object-fit: cover;
+          border-radius: 0;
+          display: block;
+          transition: opacity 0.3s ease-in-out;
+          opacity: 1;
+      }
+      
+      .slider-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0,0,0,0.5);
+        color: #fff;
+        border: none;
+        font-size: 24px;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 50%;
+      }
+      
+      .slider-btn.left { left: 10px; }
+      .slider-btn.right { right: 10px; }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- SLIDER SECTION -->
+    <div class="slider-container">
+      <button class="slider-btn left" onclick="prevSlide()">&#8592;</button>
+      <img id="slider" class="slider-img" src="https://picsum.photos/id/1015/400/250" alt="Gambar Slider">
+      <button class="slider-btn right" onclick="nextSlide()">&#8594;</button>
+    </div>
+    
+    <!-- SLIDER SCRIPT -->
+    <script>
+      const images = [
+        "https://asset-2.tribunnews.com/makassar/foto/bank/originals/ilustrasi-diskon-50-persen.jpg",
+        "https://shopee.co.id/inspirasi-shopee/wp-content/uploads/2021/08/hp-flagship-murah-1280x720.webp",
+        "https://kontenesia.com/wp-content/uploads/2018/02/Promosi-Kaos-Oversize-min.jpg",
+        "https://asset.tribunnews.com/1CNPywzWFqbC8kvMoqswK9OWkJ4=/1200x675/filters:upscale():quality(30):format(webp):focal(0.5x0.5:0.5x0.5)/jambi/foto/bank/originals/15042017-jam-tangan_20170415_215504.jpg"
+      ];
+      let current = 0;
+      const slider = document.getElementById('slider');
+
+      function showSlide(idx) {
+        slider.style.opacity = '0';
+        setTimeout(() => {
+          slider.src = images[idx];
+          slider.style.opacity = '1';
+        }, 300);
+      }
+
+      function nextSlide() {
+        current = (current + 1) % images.length;
+        showSlide(current);
+      }
+
+      function prevSlide() {
+        current = (current - 1 + images.length) % images.length;
+        showSlide(current);
+      }
+
+      // Auto slide
+      setInterval(nextSlide, 4000);
+    </script>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full z-50 glass">
+        <div class="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+            <a href="#" class="text-2xl font-bold font-heading text-primary tracking-tight" onclick="renderHome()">
+                Marz<span class="text-slate-900">Pedia</span>
+            </a>
+
+            <div class="hidden md:flex flex-1 max-w-md relative">
+                <i class="ph ph-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="Search products..." 
+                    class="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    oninput="renderProducts()">
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Navigation Menu -->
+                <div class="hidden md:flex gap-4">
+                    <button onclick="renderHome()" class="px-4 py-2 text-slate-700 font-medium hover:text-primary hover:bg-slate-100 rounded-lg transition-colors">
+                        Beranda
+                    </button>
+                    <button onclick="renderAbout()" class="px-4 py-2 text-slate-700 font-medium hover:text-primary hover:bg-slate-100 rounded-lg transition-colors">
+                        About Me
+                    </button>
+                    <button onclick="renderContact()" class="px-4 py-2 text-slate-700 font-medium hover:text-primary hover:bg-slate-100 rounded-lg transition-colors">
+                        Contact
+                    </button>
+                </div>
+
+                <button onclick="openDrawer()" class="relative p-2 hover:bg-slate-100 rounded-full transition-colors">
+                    <i class="ph ph-shopping-cart text-2xl text-slate-700"></i>
+                    <span id="cartBadge" class="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center opacity-0 transition-opacity">0</span>
+                </button>
+                
+                <div id="authArea">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="app" class="container mx-auto px-4 pt-24 pb-12 flex-1">
+        <!-- Views will be injected here -->
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t py-12 mt-auto">
+        <div class="container mx-auto text-center text-slate-500">
+            <h3 class="text-primary font-bold text-xl mb-2">Marz Pedia</h3>
+            <p class="text-sm text-slate-600 mb-2">Follow Me On Media Social</p>
+            <div class="flex justify-center gap-4 mb-4">
+                <a href="#" title="Facebook" class="hover:text-primary text-2xl"><i class="ph ph-facebook-logo"></i></a>
+                <a href="#" title="Instagram" class="hover:text-primary text-2xl"><i class="ph ph-instagram-logo"></i></a>
+                <a href="#" title="X / Twitter" class="hover:text-primary text-2xl"><i class="ph ph-x-logo"></i></a>
+                <a href="#" title="WhatsApp" class="hover:text-primary text-2xl"><i class="ph ph-whatsapp-logo"></i></a>
+                <a href="#" title="YouTube" class="hover:text-primary text-2xl"><i class="ph ph-youtube-logo"></i></a>
+            </div>
+            <p>&copy; 2025 Marz Pedia. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- CART DRAWER (Overlay) -->
+    <div id="cartDrawer" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/20 backdrop-blur-sm" onclick="closeDrawer()"></div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col transform transition-transform duration-300 translate-x-full" id="drawerContent">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h2 class="text-xl font-bold font-heading">Your Cart</h2>
+                <button onclick="closeDrawer()" class="p-2 hover:bg-slate-100 rounded-full"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- Cart Items Injected Here -->
+            </div>
+            <div class="p-4 border-t bg-slate-50">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="font-medium text-slate-600">Total</span>
+                    <span id="cartTotal" class="text-2xl font-bold text-primary">Rp 0</span>
+                </div>
+                <button onclick="DB.checkout()" class="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-teal-600 transition-colors shadow-lg shadow-teal-500/20">
+                    Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div id="authModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeAuth()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-95 opacity-0" id="authContent">
+            <h2 class="text-2xl font-bold font-heading text-center mb-6">Login</h2>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                    <input type="text" id="loginUser" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" placeholder="admin">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                    <input type="password" id="loginPass" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" placeholder="admin">
+                </div>
+                <button type="submit" class="w-full py-2 bg-primary text-white rounded-lg font-bold hover:bg-teal-600 transition-colors">Login</button>
+                <p class="text-xs text-center text-slate-400">Try: admin/admin or user/user</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-slate-900 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-[80]">
+        Item added to cart
+    </div>
+
+    <!-- APPLICATION LOGIC -->
+    <script>
+        // --- DATA STORE ---
+        const uid = () => Math.random().toString(36).slice(2);
+        const formatRupiah = (n) => 'Rp ' + Number(n).toLocaleString('id-ID');
+
+        const DB = {
+            products: [
+                {id:uid(),title:'Kaos Polos Putih',price:50000,cat:'Pakaian',stock:20,img:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80',sold:12},
+                {id:uid(),title:'Celana Jeans Skinny',price:150000,cat:'Pakaian',stock:15,img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDynKYG3rpwfUJiB5mEWe-Ibe8EnU-2bmfTA&s',sold:8},
+                {id:uid(),title:'Jaket Hoodie Abu-abu',price:180000,cat:'Pakaian',stock:10,img:'https://dynamic.zacdn.com/dqCpimjRWKjlT0B_fdD2aD3D6OI=/filters:quality(70):format(webp)/https://static-id.zacdn.com/p/little-fresco-0318-3963172-1.jpg',sold:6},
+                {id:uid(),title:'Headset Gaming RGB',price:250000,cat:'Elektronik',stock:8,img:'https://images-cdn.ubuy.co.id/68f843f16dc7336ff00f38d2-gaming-headset-gaming-headphones-with.jpg',sold:34},
+                {id:uid(),title:'Mouse Gaming Wireless',price:180000,cat:'Elektronik',stock:12,img:'https://images-cdn.ubuy.co.id/67df6e08d291cd779031c7cd-tsv-rgb-gaming-mouse-wired-usb-computer.jpg',sold:22},
+                {id:uid(),title:'Keyboard Mekanik RGB',price:350000,cat:'Elektronik',stock:5,img:'https://dorangadget.com/wp-content/uploads/2022/03/Keyboard-Mechanical-Murah-.jpg',sold:18},
+                {id:uid(),title:'Kopi',price:25000,cat:'Makanan',stock:50,img:'https://smb-padiumkm-images-public-prod.oss-ap-southeast-5.aliyuncs.com/product/image/21122023/639319630282ec3df8517e5e/658407ff5fbe250a49f9a748/a57e40ea45bff9e1428addee0f9f9b.jpg?x-oss-process=image/resize,m_pad,w_432,h_432/quality,Q_70',sold:54},
+                {id:uid(),title:'Teh',price:35000,cat:'Makanan',stock:40,img:'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full/catalog-image/91/MTA-164154420/brd-03342_tong-tji-black-tea-teh-hitam-teh-celup-harga-per-sachet_full01-a834f293.jpg',sold:31},
+                {id:uid(),title:'Snack Keripik',price:45000,cat:'Makanan',stock:30,img:'https://awsimages.detik.net.id/community/media/visual/2021/07/24/4-keripik-kentang-rasa-rumput-laut-mana-yang-paling-kriuk-enak.jpeg?w=1200',sold:28},
+                {id:uid(),title:'Tas Tangan Wanita',price:250000,cat:'Aksesoris',stock:8,img:'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',sold:10},
+                {id:uid(),title:'Jam Tangan Sport',price:175000,cat:'Aksesoris',stock:14,img:'https://images.tokopedia.net/blog-tokopedia-com/uploads/2019/09/Blog_Pilihan-Jam-Tangan-Outdoor-Terbaik-Tangguh-dan-Canggih.jpg',sold:7},
+                {id:uid(),title:'Lampu LED Hias',price:65000,cat:'Elektronik',stock:25,img:'https://siopen.balangankab.go.id/storage/merchant/products/2024/08/01/d3e1be0a75f294fbf7fd7903a0bdc77b.jpg',sold:19},
+            ],
+            cart: JSON.parse(localStorage.getItem('tk_cart') || '[]'),
+            session: JSON.parse(localStorage.getItem('tk_session') || 'null'),
+            
+            saveCart() { localStorage.setItem('tk_cart', JSON.stringify(this.cart)); renderCartCount(); },
+            saveSession() { localStorage.setItem('tk_session', JSON.stringify(this.session)); renderAuth(); },
+            
+            addToCart(id) {
+                const p = this.products.find(x => x.id === id);
+                const exist = this.cart.find(x => x.id === id);
+                if(exist) exist.qty++;
+                else this.cart.push({...p, qty: 1});
+                this.saveCart();
+                showToast(`Added ${p.title} to cart`);
+            },
+            
+            updateQty(id, delta) {
+                const item = this.cart.find(x => x.id === id);
+                if(item) {
+                    item.qty += delta;
+                    if(item.qty <= 0) this.cart = this.cart.filter(x => x.id !== id);
+                    this.saveCart();
+                    renderCartDrawer();
+                }
+            },
+            
+            checkout() {
+                if(!this.session) { alert('Please login first!'); return; }
+                alert('Checkout Successful! (Simulation)');
+                this.cart = [];
+                this.saveCart();
+                closeDrawer();
+            },
+
+            login(username, password) {
+                if(username === 'admin' && password === 'admin') {
+                    this.session = { name: 'Administrator', role: 'admin' };
+                    this.saveSession();
+                    return true;
+                }
+                if(username === 'user' && password === 'user') {
+                    this.session = { name: 'Customer', role: 'customer' };
+                    this.saveSession();
+                    return true;
+                }
+                return false;
+            },
+
+            logout() {
+                this.session = null;
+                this.saveSession();
+                if(window.location.hash === '#admin') window.location.hash = '';
+            }
+        };
+
+        const app = document.getElementById('app');
+        const drawer = document.getElementById('cartDrawer');
+        const drawerContent = document.getElementById('drawerContent');
+        
+        function renderHome() {
+            app.innerHTML = `
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <aside class="hidden lg:block w-64 shrink-0">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border sticky top-24">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="ph ph-faders text-xl"></i>
+                                <h3 class="font-bold font-heading">Filters</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="text-sm font-semibold mb-2">Categories</h4>
+                                    <div id="catFilters" class="space-y-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold font-heading">All Products</h2>
+                            <span class="text-slate-500 text-sm" id="productCount">0 items</span>
+                        </div>
+                        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+                    </div>
+                </div>
+            `;
+            renderFilters();
+            renderProducts();
+        }
+
+        function renderFilters() {
+            const cats = [...new Set(DB.products.map(p => p.cat))];
+            const container = document.getElementById('catFilters');
+            if(!container) return;
+            container.innerHTML = cats.map(c => `
+                <label class="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
+                    <input type="checkbox" value="${c}" class="rounded text-primary focus:ring-primary" onchange="renderProducts()">
+                    <span class="text-sm">${c}</span>
+                </label>
+            `).join('');
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            if(!grid) return;
+
+            const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const checkedCats = Array.from(document.querySelectorAll('#catFilters input:checked')).map(i => i.value);
+            
+            const filtered = DB.products.filter(p => {
+                const matchSearch = p.title.toLowerCase().includes(search);
+                const matchCat = checkedCats.length === 0 || checkedCats.includes(p.cat);
+                return matchSearch && matchCat;
+            });
+
+            document.getElementById('productCount').innerText = `${filtered.length} items`;
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400">No products found.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="group bg-white rounded-xl border overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
+                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${p.title}">
+                        <button onclick="DB.addToCart('${p.id}')" class="absolute bottom-3 right-3 bg-white/90 backdrop-blur p-2 rounded-full shadow-lg hover:bg-primary hover:text-white transition-colors transform translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
+                            <i class="ph ph-plus text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">${p.cat}</div>
+                        <h3 class="font-heading font-semibold text-lg leading-tight mb-2 line-clamp-1">${p.title}</h3>
+                        <div class="mt-auto flex items-center justify-between">
+                            <span class="text-lg font-bold text-primary">${formatRupiah(p.price)}</span>
+                            <span class="text-xs text-slate-400">${p.sold} sold</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdmin() {
+            if(!DB.session || DB.session.role !== 'admin') { renderHome(); return; }
+            
+            app.innerHTML = `
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl font-bold font-heading">Admin Dashboard</h1>
+                        <button class="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium" onclick="alert('Feature not implemented in standalone demo')">
+                            <i class="ph ph-plus"></i> Add Product
+                        </button>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl border shadow-sm">
+                            <h3 class="text-slate-500 text-sm font-medium mb-1">Total Products</h3>
+                            <p class="text-3xl font-bold font-heading text-slate-800">${DB.products.length}</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border shadow-sm">
+                            <h3 class="text-slate-500 text-sm font-medium mb-1">Inventory Value</h3>
+                            <p class="text-3xl font-bold font-heading text-primary">${formatRupiah(DB.products.reduce((a,b)=>a+(b.price*b.stock),0))}</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border shadow-sm overflow-hidden">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-600 font-heading border-b">
+                                <tr>
+                                    <th class="p-4">Product</th>
+                                    <th class="p-4">Price</th>
+                                    <th class="p-4">Stock</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                ${DB.products.map(p => `
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="p-4 flex items-center gap-3">
+                                            <img src="${p.img}" class="w-10 h-10 rounded object-cover bg-slate-200">
+                                            <span class="font-medium">${p.title}</span>
+                                        </td>
+                                        <td class="p-4">${formatRupiah(p.price)}</td>
+                                        <td class="p-4">${p.stock}</td>
+                                        <td class="p-4 text-right">
+                                            <button onclick="alert('Delete simulated')" class="text-red-500 hover:bg-red-50 p-2 rounded"><i class="ph ph-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCartCount() {
+            const qty = DB.cart.reduce((a,b)=>a+b.qty,0);
+            const badge = document.getElementById('cartBadge');
+            badge.innerText = qty;
+            badge.style.opacity = qty > 0 ? '1' : '0';
+        }
+
+        function renderCartDrawer() {
+            const container = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+            
+            if(DB.cart.length === 0) {
+                container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400"><i class="ph ph-shopping-cart text-4xl mb-2"></i><p>Cart is empty</p></div>`;
+                totalEl.innerText = formatRupiah(0);
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = DB.cart.map(item => {
+                total += item.price * item.qty;
+                return `
+                    <div class="flex gap-4">
+                        <img src="${item.img}" class="w-20 h-20 object-cover rounded-lg bg-slate-100">
+                        <div class="flex-1 flex flex-col justify-center">
+                            <h4 class="font-medium line-clamp-1">${item.title}</h4>
+                            <p class="text-sm text-slate-500 mb-2">${formatRupiah(item.price)}</p>
+                            <div class="flex items-center gap-3">
+                                <button onclick="DB.updateQty('${item.id}', -1)" class="w-6 h-6 rounded border flex items-center justify-center hover:bg-slate-100"><i class="ph ph-minus text-xs"></i></button>
+                                <span class="text-sm font-medium w-4 text-center">${item.qty}</span>
+                                <button onclick="DB.updateQty('${item.id}', 1)" class="w-6 h-6 rounded border flex items-center justify-center hover:bg-slate-100"><i class="ph ph-plus text-xs"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            totalEl.innerText = formatRupiah(total);
+        }
+
+        function openDrawer() {
+            drawer.classList.remove('hidden');
+            renderCartDrawer();
+            setTimeout(() => {
+                document.getElementById('drawerContent').classList.remove('translate-x-full');
+            }, 10);
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawerContent').classList.add('translate-x-full');
+            setTimeout(() => {
+                drawer.classList.add('hidden');
+            }, 300);
+        }
+
+        function renderAuth() {
+            const area = document.getElementById('authArea');
+            if(DB.session) {
+                area.innerHTML = `
+                    <div class="relative group">
+                        <button class="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-100 rounded-full transition-colors">
+                            <div class="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center font-bold text-sm">
+                                ${DB.session.name.charAt(0)}
+                            </div>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border py-1 hidden group-hover:block">
+                            <div class="px-4 py-2 border-b">
+                                <p class="font-medium text-sm">${DB.session.name}</p>
+                                <p class="text-xs text-slate-500 capitalize">${DB.session.role}</p>
+                            </div>
+                            ${DB.session.role === 'admin' ? `<a href="#admin" onclick="renderAdmin()" class="block px-4 py-2 text-sm hover:bg-slate-50 text-primary">Admin Dashboard</a>` : ''}
+                            <a href="#" onclick="renderHome()" class="block px-4 py-2 text-sm hover:bg-slate-50">Home</a>
+                            <button onclick="DB.logout()" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50">Logout</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                area.innerHTML = `
+                    <button onclick="openAuth()" class="px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-100 transition-colors">
+                        Login
+                    </button>
+                `;
+            }
+        }
+
+        function openAuth() {
+            document.getElementById('authModal').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('authContent').classList.remove('opacity-0', 'scale-95');
+            }, 10);
+        }
+
+        function closeAuth() {
+            document.getElementById('authContent').classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                document.getElementById('authModal').classList.add('hidden');
+            }, 200);
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUser').value;
+            const p = document.getElementById('loginPass').value;
+            if(DB.login(u, p)) {
+                closeAuth();
+                showToast(`Welcome back, ${DB.session.name}!`);
+            } else {
+                alert('Invalid! Try admin/admin');
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                t.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function renderAbout() {
+            app.innerHTML = `
+                <div class="max-w-2xl mx-auto">
+                    <h1 class="text-4xl font-bold font-heading mb-6 text-primary">About Me</h1>
+                    <div class="bg-white rounded-xl shadow-sm border p-8 space-y-6">
+                        <div class="flex items-center gap-6 mb-8">
+                            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-teal-500 flex items-center justify-center">
+                                <i class="ph ph-user text-5xl text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold font-heading">Marz Pedia Team</h2>
+                                <p class="text-slate-600">E-Commerce Platform</p>
+                            </div>
+                        </div>
+                        
+                        <section>
+                            <h3 class="text-xl font-bold font-heading mb-3 text-slate-900">Who We Are</h3>
+                            <p class="text-slate-700 leading-relaxed">
+                                Kami adalah tim profesional yang berkomitmen untuk menyediakan pengalaman berbelanja online terbaik. 
+                                Dengan berbagai produk berkualitas dari kategori pakaian, elektronik, makanan, dan aksesoris, 
+                                kami siap memenuhi kebutuhan Anda.
+                            </p>
+                        </section>
+
+                        <section>
+                            <h3 class="text-xl font-bold font-heading mb-3 text-slate-900">Our Mission</h3>
+                            <p class="text-slate-700 leading-relaxed">
+                                Memberikan layanan belanja online yang aman, nyaman, dan terpercaya dengan produk-produk pilihan 
+                                berkualitas tinggi dan harga yang kompetitif.
+                            </p>
+                        </section>
+
+                        <section>
+                            <h3 class="text-xl font-bold font-heading mb-3 text-slate-900">Why Choose Us</h3>
+                            <ul class="space-y-2 text-slate-700">
+                                <li class="flex items-center gap-3"><i class="ph ph-check-circle text-primary text-xl"></i>Produk berkualitas terjamin</li>
+                                <li class="flex items-center gap-3"><i class="ph ph-check-circle text-primary text-xl"></i>Harga terjangkau dan kompetitif</li>
+                                <li class="flex items-center gap-3"><i class="ph ph-check-circle text-primary text-xl"></i>Pengiriman cepat dan aman</li>
+                                <li class="flex items-center gap-3"><i class="ph ph-check-circle text-primary text-xl"></i>Customer service responsif</li>
+                            </ul>
+                        </section>
+
+                        <div class="pt-4 border-t">
+                            <button onclick="renderHome()" class="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-teal-600 transition-colors">
+                                Back to Home
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderContact() {
+            app.innerHTML = `
+                <div class="max-w-2xl mx-auto">
+                    <h1 class="text-4xl font-bold font-heading mb-6 text-primary">Contact Us</h1>
+                    <div class="bg-white rounded-xl shadow-sm border p-8">
+                        <form onsubmit="handleContactSubmit(event)" class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Name</label>
+                                <input type="text" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" placeholder="Your Name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                                <input type="email" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" placeholder="your@email.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Phone</label>
+                                <input type="tel" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" placeholder="+62 812 3456 7890">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Subject</label>
+                                <input type="text" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" placeholder="Message subject">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Message</label>
+                                <textarea required rows="5" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none resize-none" placeholder="Your message here..."></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-primary text-white rounded-lg font-bold hover:bg-teal-600 transition-colors">
+                                Send Message
+                            </button>
+                        </form>
+
+                        <div class="mt-8 pt-8 border-t space-y-4">
+                            <h3 class="text-xl font-bold font-heading">Contact Information</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-start gap-3">
+                                    <i class="ph ph-map-pin text-primary text-xl mt-1"></i>
+                                    <div>
+                                        <p class="font-medium">Alamat</p>
+                                        <p class="text-slate-600 text-sm">Jl. Raya No. 123, Jakarta, Indonesia</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i class="ph ph-phone text-primary text-xl mt-1"></i>
+                                    <div>
+                                        <p class="font-medium">Phone</p>
+                                        <p class="text-slate-600 text-sm">+62 21 1234 5678</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i class="ph ph-envelope text-primary text-xl mt-1"></i>
+                                    <div>
+                                        <p class="font-medium">Email</p>
+                                        <p class="text-slate-600 text-sm">info@marzpedia.com</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-6 border-t">
+                            <button onclick="renderHome()" class="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-teal-600 transition-colors">
+                                Back to Home
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            showToast('Thank you! Your message has been sent.');
+            setTimeout(() => renderHome(), 2000);
+        }
+
+        renderAuth();
+        renderCartCount();
+        
+        window.onhashchange = () => {
+            if(window.location.hash === '#admin') renderAdmin();
+            else renderHome();
+        };
+        
+        if(window.location.hash === '#admin') renderAdmin();
+        else renderHome();
+    </script>
+</body>
+</html>
